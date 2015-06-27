@@ -12,7 +12,8 @@
     "underscore": "~1.7.0",
     "winston": "~0.8.3",
     "rabbit.js": "~0.4.2",
-    "forever": "~0.14.1"
+    "forever": "~0.14.1",
+    "mongodb": "~1.4.30"
   },
   "devDependencies": {
     "should": "~4.3.0",
