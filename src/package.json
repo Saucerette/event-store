@@ -1,0 +1,21 @@
+{
+  "name": "event-store",
+  "version": "0.1.0",
+  "description": "Stores incoming rabbitmq events",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Saucerette/event-store.git"
+  },
+  "author": "Tim Rodger tim.rodger@gmail.com",
+  "dependencies": {
+    "underscore": "~1.7.0",
+    "winston": "~0.8.3",
+    "rabbit.js": "~0.4.2",
+    "forever": "~0.14.1"
+  },
+  "devDependencies": {
+    "should": "~4.3.0",
+    "mocha": "~2.0.1"
+  }
+}
