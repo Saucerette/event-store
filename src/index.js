@@ -1,4 +1,5 @@
 var express = require('express'),
+    bodyParser = require('body-parser'),
     logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
     MongoClient = require('mongodb').MongoClient;
@@ -14,10 +15,10 @@ var collection = '';
 
 MongoClient.connect(mongo_url, function(err, db) {
     if (!err) {
-        logger.log('info', 'Connected to server at ' + mongo_url);
+        logger.info('Connected to server at ' + mongo_url);
         collection = db.collection('events');
     } else {
-        logger.log('error', 'Connection to mongo failed');
+        logger.error('Connection to mongo failed');
         // shutdown here
     }
 });
@@ -50,25 +51,28 @@ context.on('ready', function() {
 
 var routes = express.Router();
 
-routes.get('/', function (req, res) {
-    res.json({
-        name : 'event-store',
-        description : "Stores events"
-    });
-});
-
 routes.get('/events', function (req, res) {
+
     // expect query to contain id=abc
-    var events = collection.find({"data.id" : req.query.id}, function(err, results){
+    var events = collection.find({"data.id" : req.query.id}, {fields:{_id:0}}).toArray(function(err, results){
 
         res.set({'Content-Type' : "application/json"});
 
         if (!err){
+            logger.info(JSON.stringify(results));
             res.status(200).send(results);
         } else {
+            logger.error(err);
             res.status(500).send({"error" : err});
         }
     });
-
-
 });
+
+var PORT = process.env.PORT || 80;
+var app = express();
+
+app.use(bodyParser.json({limit: '1024kb'}));
+app.use('/', routes);
+app.listen(PORT);
+
+logger.info('Running event-store service on http://localhost:' + PORT);
