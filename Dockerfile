@@ -2,6 +2,8 @@ FROM ubuntu:latest
 
 MAINTAINER Tim Rodger
 
+EXPOSE 80
+
 # Install dependencies
 RUN apt-get update -qq && \
     apt-get -y install \

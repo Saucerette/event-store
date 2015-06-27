@@ -9,7 +9,9 @@
   },
   "author": "Tim Rodger tim.rodger@gmail.com",
   "dependencies": {
-    "underscore": "~1.7.0",
+    "express": "~4.*",
+    "body-parser": "~1.*",
+    "underscore": "~1.8.*",
     "winston": "~0.8.3",
     "rabbit.js": "~0.4.2",
     "forever": "~0.14.1",

@@ -1,4 +1,5 @@
-var logger = require('./lib/logger'),
+var express = require('express'),
+    logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
     MongoClient = require('mongodb').MongoClient;
 
@@ -45,4 +46,29 @@ context.on('ready', function() {
             });
         });
     });
+});
+
+var routes = express.Router();
+
+routes.get('/', function (req, res) {
+    res.json({
+        name : 'event-store',
+        description : "Stores events"
+    });
+});
+
+routes.get('/events', function (req, res) {
+    // expect query to contain id=abc
+    var events = collection.find({"data.id" : req.query.id}, function(err, results){
+
+        res.set({'Content-Type' : "application/json"});
+
+        if (!err){
+            res.status(200).send(results);
+        } else {
+            res.status(500).send({"error" : err});
+        }
+    });
+
+
 });
