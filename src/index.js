@@ -3,7 +3,7 @@ var express = require('express'),
     logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
     MongoClient = require('mongodb').MongoClient,
-    routes = require('routes');
+    routes = require('./routes');
 
 logger.info('running');
 
