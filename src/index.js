@@ -2,7 +2,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
-    MongoClient = require('mongodb').MongoClient,
+    Config = require('./config'),
     routes = require('./routes');
 
 logger.info('running');
@@ -11,20 +11,8 @@ var context = rabbitmq.createContext(
     'amqp://' + process.env.RABBITMQ_PORT_5672_TCP_ADDR + ':' + process.env.RABBITMQ_PORT_5672_TCP_PORT
 );
 
-var mongo_url = 'mongodb://' + process.env.MONGODB_PORT_27017_TCP_ADDR + ':27017/store';
-var collection = '';
-
-MongoClient.connect(mongo_url, function(err, db) {
-    if (!err) {
-        logger.info('Connected to server at ' + mongo_url);
-        collection = db.collection('events');
-    } else {
-        logger.error('Connection to mongo failed');
-        // shutdown here
-    }
-});
-
 context.on('ready', function() {
+    
     logger.info('connected');
 
     // subscribe to 'events' queue
@@ -36,19 +24,15 @@ context.on('ready', function() {
         sub.on('data', function (body) {
 
             try {
-                var event = JSON.parse(body);
-
-                logger.info(event);
-
-                collection.insert(event, function (err, result) {
+                Config.getStore().add(JSON.parse(body), function(err, result){
                     if (!err) {
-                        logger.log('info', 'Inserted event.');
+                        logger.info('Added event: ' + JSON.parse(body));
                     } else {
-                        logger.log('error', 'Event insert failed.');
+                        logger.log('error', 'Event adding failed.');
                     }
                 });
             } catch (e) {
-                logger.error(e);
+                logger.error("Invalid event body " + body + " : " + e);
             }
 
         });

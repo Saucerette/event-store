@@ -1,5 +1,6 @@
 var express = require('express'),
-    logger = require('./lib/logger');
+    logger = require('./lib/logger'),
+    Config = require('./config');
 
 module.exports = (function() {
     'use strict';
@@ -11,8 +12,7 @@ module.exports = (function() {
      */
     routes.get('/events', function (req, res) {
 
-        // expect query to contain id=abc
-        collection.find({"data.id" : req.query.id}, {}, {sort:"timestamp"}).toArray(function(err, results){
+        Config.getStore().find(req.query.id, function(err, results) {
 
             if (!err){
                 logger.info(JSON.stringify(results));
