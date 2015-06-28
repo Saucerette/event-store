@@ -2,7 +2,8 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
-    MongoClient = require('mongodb').MongoClient;
+    MongoClient = require('mongodb').MongoClient,
+    routes = require('routes');
 
 logger.info('running');
 
@@ -34,37 +35,23 @@ context.on('ready', function() {
         // deal with events as they come in
         sub.on('data', function (body) {
 
-            var event = JSON.parse(body);
+            try {
+                var event = JSON.parse(body);
 
-            logger.info(event);
+                logger.info(event);
 
-            collection.insert(event, function (err, result) {
-                if (!err) {
-                    logger.log('info', 'Inserted event.');
-                } else {
-                    logger.log('error', 'Event insert failed.');
-                }
-            });
+                collection.insert(event, function (err, result) {
+                    if (!err) {
+                        logger.log('info', 'Inserted event.');
+                    } else {
+                        logger.log('error', 'Event insert failed.');
+                    }
+                });
+            } catch (e) {
+                logger.error(e);
+            }
+
         });
-    });
-});
-
-var routes = express.Router();
-
-routes.get('/events', function (req, res) {
-
-    // expect query to contain id=abc
-    var events = collection.find({"data.id" : req.query.id}, {fields:{_id:0}}).toArray(function(err, results){
-
-        res.set({'Content-Type' : "application/json"});
-
-        if (!err){
-            logger.info(JSON.stringify(results));
-            res.status(200).send(results);
-        } else {
-            logger.error(err);
-            res.status(500).send({"error" : err});
-        }
     });
 });
 
