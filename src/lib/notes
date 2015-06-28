@@ -1,0 +1,4 @@
+error: uncaughtException: connect ECONNREFUSED date=Sun Jun 28 2015 18:06:28 GMT+0000 (UTC), pid=12, uid=0, gid=0, cwd=/home/app, execPath=/usr/bin/nodejs, version=v0.10.25, argv=[/usr/bin/nodejs, /home/app/index.js], rss=33480704, heapTotal=29087488, heapUsed=15428064, loadavg=[0.3232421875, 0.1142578125, 0.1591796875], uptime=529306.145122904,
+trace=[column=11, file=net.js, function=errnoException, line=901, method=null, native=false, column=19, file=net.js,
+function=Object.afterConnect [as oncomplete], line=892, method=afterConnect [as oncomplete], native=false],
+stack=[Error: connect ECONNREFUSED,     at errnoException (net.js:901:11),     at Object.afterConnect [as oncomplete] (net.js:892:19)]

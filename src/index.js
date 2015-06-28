@@ -1,4 +1,4 @@
-var express = require('express'),
+var app = require('express')(),
     bodyParser = require('body-parser'),
     logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
@@ -12,8 +12,16 @@ var context = rabbitmq.createContext(
 );
 
 context.on('ready', function() {
-    
+
     logger.info('connected');
+
+    var PORT = process.env.PORT || 80;
+
+    app.use(bodyParser.json({limit: '1024kb'}));
+    app.use('/', routes);
+    app.listen(PORT);
+
+    logger.info('Running event-store service on http://localhost:' + PORT);
 
     // subscribe to 'events' queue
     var sub = context.socket('SUB');
@@ -39,11 +47,3 @@ context.on('ready', function() {
     });
 });
 
-var PORT = process.env.PORT || 80;
-var app = express();
-
-app.use(bodyParser.json({limit: '1024kb'}));
-app.use('/', routes);
-app.listen(PORT);
-
-logger.info('Running event-store service on http://localhost:' + PORT);

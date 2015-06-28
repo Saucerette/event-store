@@ -1,20 +1,35 @@
-var MongoClient = require('mongodb').MongoClient;
+var MongoClient = require('mongodb').MongoClient,
+    logger = require('./logger');
 
 /*
  * Provides access to documents
  */
 function Store(url, collection) {
+    this.url = url;
+    this.collection_name = collection;
+    this.collection = null;
+}
 
-    MongoClient.connect(url, function(err, db) {
-        if (!err) {
-            logger.info('Connected to server at ' + url);
-            this.collection = db.collection(collection);
-        } else {
-            logger.error('Connection to mongo failed');
-            throw "Can't connect to mongo " + url
-        }
-    });
-};
+/**
+ *
+ */
+//Store.prototype.getCollection = function () {
+//
+//    if (!this.collection) {
+//
+//        var store = this;
+//
+//        MongoClient.connect(url, function (err, db) {
+//            if (!err) {
+//                store.collection = db.collection(store.collection_name);
+//            } else {
+//                throw "Can't connect to mongo " + url;
+//            }
+//        });
+//    }
+//
+//    return this.collection;
+//};
 
 module.exports = Store;
 
@@ -26,10 +41,13 @@ module.exports = Store;
  */
 Store.prototype.find = function(id, callback) {
 
-    this.collection.find({"data.id" : id}, {}, {sort:"timestamp"}).toArray(function(err, results){
+    this.exec(function(err, db, collection) {
+        if (!err) {
+            collection.find({"data.id": id}, {}, {sort: "timestamp"}).toArray(function (err, results) {
 
-        if (!err){
-            callback(null, results);
+                db.close();
+                callback(err, results);
+            });
         } else {
             callback(err, null);
         }
@@ -37,20 +55,40 @@ Store.prototype.find = function(id, callback) {
 };
 
 /**
- * Add a new event object
  *
- * @param id
- * @param doc
+ * @param event
  * @param callback
  */
 Store.prototype.add = function(event, callback) {
 
-    this.collection.insert(event, function (err, result) {
+    this.exec(function(err, db, collection) {
 
-        if (!err){
-            callback(null, result);
+        if (!err) {
+            collection.insert(event, function (err, result) {
+                db.close();
+                callback(err, result);
+            });
         } else {
             callback(err, null);
+        }
+    });
+};
+
+
+
+/**
+ * I don't see why this store connects to mongo for each operation
+ */
+Store.prototype.exec = function(func) {
+    var store = this;
+
+    MongoClient.connect(this.url, function(err, db) {
+        if (!err) {
+            logger.log('info', 'Connected to server at ' + store.url);
+            func(null, db, db.collection(store.collection_name));
+        } else {
+            logger.log('error', 'Connect to server failed at ' + store.url);
+            func(err, null, null);
         }
     });
 };
