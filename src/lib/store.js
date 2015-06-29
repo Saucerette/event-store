@@ -10,27 +10,6 @@ function Store(url, collection) {
     this.collection = null;
 }
 
-/**
- *
- */
-//Store.prototype.getCollection = function () {
-//
-//    if (!this.collection) {
-//
-//        var store = this;
-//
-//        MongoClient.connect(url, function (err, db) {
-//            if (!err) {
-//                store.collection = db.collection(store.collection_name);
-//            } else {
-//                throw "Can't connect to mongo " + url;
-//            }
-//        });
-//    }
-//
-//    return this.collection;
-//};
-
 module.exports = Store;
 
 /**

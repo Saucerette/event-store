@@ -1,5 +1,5 @@
 var express = require('express'),
-    logger = require('./lib/logger'),
+    logger = require('./logger'),
     Config = require('./config');
 
 module.exports = (function() {

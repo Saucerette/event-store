@@ -1,9 +1,7 @@
-var app = require('express')(),
-    bodyParser = require('body-parser'),
-    logger = require('./lib/logger'),
+var logger = require('./lib/logger'),
     rabbitmq = require('rabbit.js'),
-    Config = require('./config'),
-    routes = require('./routes');
+    web_router = require('./lib/web_router'),
+    fact_router = require('./lib/fact_router');
 
 logger.info('running');
 
@@ -11,38 +9,28 @@ var context = rabbitmq.createContext(
     'amqp://' + process.env.RABBITMQ_PORT_5672_TCP_ADDR + ':' + process.env.RABBITMQ_PORT_5672_TCP_PORT
 );
 
+web_router.running();
+
 context.on('ready', function() {
 
     logger.info('connected');
 
-    var PORT = process.env.PORT || 80;
+    web_router.connected();
 
-    app.use(bodyParser.json({limit: '1024kb'}));
-    app.use('/', routes);
-    app.listen(PORT);
+    logger.info('Running event-store service');
 
-    logger.info('Running event-store service on http://localhost:' + PORT);
+    var sub = context.socket('SUB'),
+        pub = context.socket('PUB');
 
-    // subscribe to 'events' queue
-    var sub = context.socket('SUB');
+    // get queue name from Config
+    var queue = 'events';
 
-    sub.connect('events', function(){
-
-        // deal with events as they come in
-        sub.on('data', function (body) {
-
-            try {
-                Config.getStore().add(JSON.parse(body), function(err, result){
-                    if (!err) {
-                        logger.info('Added event: ' + JSON.parse(body));
-                    } else {
-                        logger.log('error', 'Event adding failed.');
-                    }
-                });
-            } catch (e) {
-                logger.error("Invalid event body " + body + " : " + e);
-            }
-
+    pub.connect(queue, function() {
+        sub.connect(queue, function () {
+            // route events as they arrive
+            sub.on('data', function (body) {
+                fact_router.newFact(sub, pub, JSON.parse(body));
+            });
         });
     });
 });

@@ -1,7 +1,7 @@
 /**
  * Default config values
  */
-var Store = require('./lib/store');
+var Store = require('./store');
 
 var mongo_db = 'store';
 var mongo_collection = 'events';
