@@ -1,13 +1,11 @@
 var logger = require('./lib/logger'),
-    rabbitmq = require('rabbit.js'),
     web_router = require('./lib/web_router'),
-    fact_router = require('./lib/fact_router');
+    fact_router = require('./lib/fact_router'),
+    Config = require('./lib/config');
 
 logger.info('running');
 
-var context = rabbitmq.createContext(
-    'amqp://' + process.env.RABBITMQ_PORT_5672_TCP_ADDR + ':' + process.env.RABBITMQ_PORT_5672_TCP_PORT
-);
+var context = Config.getQueueContext();
 
 web_router.running();
 
@@ -27,7 +25,7 @@ context.on('ready', function() {
 
     pub.connect(queue, function() {
         sub.connect(queue, function () {
-            // route events as they arrive
+            // route facts as they arrive
             sub.on('data', function (body) {
                 fact_router.newFact(sub, pub, JSON.parse(body));
             });
